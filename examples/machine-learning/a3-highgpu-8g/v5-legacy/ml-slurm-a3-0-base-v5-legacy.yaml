@@ -54,7 +54,7 @@ deployment_groups:
     - sysnet
     settings:
       # to increase storage size and type
-      filestore_tier: ZONAL 
+      filestore_tier: HIGH_SCALE_SSD
       size_gb: 10000
       local_mount: /home
       reserved_ip_range: $(vars.filestore_ip_range)

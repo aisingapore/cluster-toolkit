@@ -18,14 +18,14 @@ blueprint_name: slurm-a3-cluster
 terraform_backend_defaults:
   type: gcs
   configuration:
-    bucket: customer-tf-state-bucket  # modify to be a bucket owned and writable by customer
+    bucket: proj-seald-terraform  # modify to be a bucket owned and writable by customer
 
 vars:
-  project_id:  ## Set GCP Project ID Here ##
+  project_id: projectseald  ## Set GCP Project ID Here ##
   deployment_name: slurm-a3-cluster
-  region: customer-region
-  zone: customer-zone
-  server_ip_homefs: 0.0.0.0 ## MUST set to IP address of Filestore instance from base deployment!
+  region: us-west1
+  zone: us-west1-b
+  server_ip_homefs: 192.168.0.2 ## MUST set to IP address of Filestore instance from base deployment!
   remote_mount_homefs: /nfsshare
   local_mount_homefs: /home
   zones: []
@@ -36,11 +36,11 @@ vars:
   instance_image_custom: true
   slurm_cluster_name: slurm0
   enable_cleanup_compute: true
-  a3_partition_name: a3
+  a3_partition_name: a3-test
   a3_static_cluster_size: 32
   # a3_reservation_name must be specified; if Google staff have provided you
   # with a reservation name, use it. Otherwise supply user-created reservation.
-  a3_reservation_name: a3-reservation-0
+  a3_reservation_name: reservation-20240806-082612
   # a3_maintenance_interval should be empty string by default; if Google staff
   # have created a reservation, they will also provide a3_maintenance_interval
   a3_maintenance_interval: ""
@@ -177,7 +177,7 @@ deployment_groups:
       node_count_dynamic_max: 0
       disk_type: pd-ssd
       machine_type: a3-highgpu-8g
-      enable_public_ips: false
+      enable_public_ips: true
       enable_smt: true
       node_conf:
         CoresPerSocket: 52
@@ -227,6 +227,7 @@ deployment_groups:
       disk_type: pd-balanced
       machine_type: c2-standard-4
       enable_login_public_ips: true
+      num_instances: 0
 
   - id: slurm_controller
     source: community/modules/scheduler/schedmd-slurm-gcp-v6-controller

@@ -17,13 +17,13 @@ blueprint_name: slurm-a3-base
 terraform_backend_defaults:
   type: gcs
   configuration:
-    bucket: customer-tf-state-bucket
+    bucket: proj-seald-terraform
 
 vars:
-  project_id:  ## Set GCP Project ID Here ##
+  project_id: projectseald   ## Set GCP Project ID Here ##
   deployment_name: slurm-a3-base
-  region: customer-region
-  zone: customer-zone
+  region: us-west1
+  zone: us-west1-b
   sys_net_range: 172.16.0.0/16
   filestore_ip_range: 192.168.0.0/29
 
@@ -53,7 +53,7 @@ deployment_groups:
     use:
     - sysnet
     settings:
-      filestore_tier: BASIC_SSD
+      filestore_tier: BASIC_SSD # to increase storage type
       size_gb: 2560
       local_mount: /home
       reserved_ip_range: $(vars.filestore_ip_range)

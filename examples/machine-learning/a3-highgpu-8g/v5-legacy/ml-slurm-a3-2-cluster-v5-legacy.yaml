@@ -203,6 +203,7 @@ deployment_groups:
       slurm_conf_tpl: modules/embedded/community/modules/scheduler/schedmd-slurm-gcp-v5-controller/etc/long-prolog-slurm.conf.tpl
       controller_startup_script: $(controller_startup.startup_script)
       enable_external_prolog_epilog: true
+      disable_controller_public_ips: false
 
   - id: slurm_login
     source: community/modules/scheduler/schedmd-slurm-gcp-v5-login
@@ -221,3 +222,4 @@ deployment_groups:
         # reset enroot to defaults of files under /home and running under /run
         # allows basic enroot testing on login node (reduced I/O)
         rm -f /etc/enroot/enroot.conf
+      disable_login_public_ips: false

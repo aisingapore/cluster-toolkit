@@ -25,7 +25,7 @@ vars:
   region: us-west1
   zone: us-west1-b
   sys_net_range: 172.16.0.0/16
-  filestore_ip_range: 192.168.0.0/29
+  filestore_ip_range: 192.168.0.0/24
 
 deployment_groups:
 - group: primary
@@ -44,6 +44,12 @@ deployment_groups:
         new_bits: 4
         subnet_private_access: true
         description: primary subnetwork in $(vars.deployment_name)-sysnet
+      firewall_rules:
+      - name: ldap-my-server
+        direction: INGRESS
+        allow:
+        - protocol: tcp
+          ports: [22, 389, 636]
     outputs:
     - network_name
     - subnetwork_name
@@ -54,8 +60,8 @@ deployment_groups:
     - sysnet
     settings:
       # to increase storage size and type
-      filestore_tier: HIGH_SCALE_SSD
-      size_gb: 10000
+      filestore_tier: ZONAL
+      size_gb: 1024
       local_mount: /home
       reserved_ip_range: $(vars.filestore_ip_range)
     outputs:

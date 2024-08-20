@@ -243,18 +243,18 @@ deployment_groups:
           systemctl enable delay-a3.service
           systemctl enable mount-local-ssd.service
           systemctl enable nvidia-dcgm
-      - type: shell
-        destination: install_ldap_client.sh
-        content: |
-          #!/bin/bash
-          apt-get update
-          apt-get install -y libnss-ldap libpam-ldap ldap-utils
-      - type: shell
-        destination: install_ldap_server.sh
-        content: |
-          #!/bin/bash
-          apt-get update
-          apt-get install -y slapd ldap-utils
+#      - type: shell
+#        destination: install_ldap_client.sh
+#        content: |
+#          #!/bin/bash
+#          apt-get update
+#          apt-get install -y libnss-ldap libpam-ldap ldap-utils
+#      - type: shell
+#        destination: install_ldap_server.sh
+#        content: |
+#          #!/bin/bash
+#          apt-get update
+#          apt-get install -y slapd ldap-utils
 #      - type: shell
 #        destination: install_conda.sh
 #        content: |

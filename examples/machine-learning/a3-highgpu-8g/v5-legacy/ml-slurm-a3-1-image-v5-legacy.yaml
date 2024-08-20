@@ -242,6 +242,28 @@ deployment_groups:
           systemctl enable mount-local-ssd.service
           systemctl enable nvidia-dcgm
       - type: shell
+        destination: install_ldap_client.sh
+        content: |
+          #!/bin/bash
+          apt-get update
+          apt-get install -y libnss-ldap libpam-ldap ldap-utils
+      - type: shell
+        destination: install_ldap_server.sh
+        content: |
+          #!/bin/bash
+          apt-get update
+          apt-get install -y slapd ldap-utils
+#      - type: shell
+#        destination: install_conda.sh
+#        content: |
+#          #!/bin/bash
+#          # to add scripts to install conda
+#          CONDA_BASE=/opt/conda
+#          mkdir -p ${CONDA_BASE}
+#          cd ${CONDA_BASE}
+#          wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ${CONDA_BASE}/miniconda3.sh
+#          bash ${CONDA_BASE}/miniconda3.sh -b -p ${CONDA_BASE}
+      - type: shell
         destination: remove_snap_gcloud.sh
         content: |
           #!/bin/bash
@@ -263,6 +285,7 @@ deployment_groups:
           apt-get install --assume-yes google-cloud-cli
           # Clean up the bash executable hash for subsequent steps using gsutil
           hash -r
+
 
 - group: slurm-build
   modules:

@@ -26,8 +26,10 @@ vars:
   region: us-west1
   zone: us-west1-b
   server_ip_homefs: 192.168.0.2 ## MUST set to IP address of Filestore instance from base deployment!
+#  server_ip_nfs2: 192.168.0.3 ## MUST set to IP address of Filestore instance from base deployment!
   remote_mount_homefs: /nfsshare
   local_mount_homefs: /home
+#  local_mount_nfs2: /nfs2
   zones:
   - $(vars.zone)
   disk_size_gb: 200
@@ -73,6 +75,13 @@ deployment_groups:
       remote_mount: $(vars.remote_mount_homefs)
       local_mount: $(vars.local_mount_homefs)
 
+#  - id: nfs2
+#    source: modules/file-system/pre-existing-network-storage
+#    settings:
+#      server_ip: $(vars.server_ip_homefs)
+#      remote_mount: $(vars.remote_mount_homefs)
+#      local_mount: $(vars.local_mount_nfs2)
+
   - id: compute_sa
     source: community/modules/project/service-account
     settings:
@@ -117,7 +126,7 @@ deployment_groups:
       disk_type: pd-ssd
       machine_type: a3-highgpu-8g
       instance_image_custom: true
-      disable_public_ips: false
+      disable_public_ips: true
       enable_smt: true
       instance_image:
         family: $(vars.final_image_family)
@@ -138,6 +147,7 @@ deployment_groups:
     - a3_node_group
     - sysnet
     - homefs
+#    - nfs2
     settings:
       partition_name: $(vars.a3_partition_name)
       enable_placement: false
@@ -176,6 +186,7 @@ deployment_groups:
     - a3_partition
     - debug_partition
     - homefs
+#    - nfs2
     settings:
       machine_type: c2-standard-16  # more powerful VM
       cloud_parameters:
@@ -192,6 +203,7 @@ deployment_groups:
       slurm_conf_tpl: modules/embedded/community/modules/scheduler/schedmd-slurm-gcp-v5-controller/etc/long-prolog-slurm.conf.tpl
       controller_startup_script: $(controller_startup.startup_script)
       enable_external_prolog_epilog: true
+      disable_controller_public_ips: false
 
   - id: slurm_login
     source: community/modules/scheduler/schedmd-slurm-gcp-v5-login
@@ -205,9 +217,20 @@ deployment_groups:
         family: $(vars.final_image_family)
         project: $(vars.project_id)
       machine_type: c2-standard-4
-      num_instances: 0  # disabled, no login node
       startup_script: |
         #!/bin/bash
         # reset enroot to defaults of files under /home and running under /run
         # allows basic enroot testing on login node (reduced I/O)
         rm -f /etc/enroot/enroot.conf
+      disable_controller_public_ips: false
+
+  - id: ldap_server
+    source: modules/compute/vm-instance
+    use:
+    - sysnet
+    settings:
+      instance_count: 1
+      name_prefix: vm
+      machine_type: c2-standard-4
+      disable_public_ips: false
+

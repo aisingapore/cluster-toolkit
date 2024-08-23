@@ -1,3 +1,5 @@
+set -euo pipefail
+
 apt install gnutls-bin ssl-cert
 
 certtool --generate-privkey --bits 4096 --outfile /etc/ssl/private/mycakey.pem
@@ -21,7 +23,7 @@ certtool --generate-privkey \
 --bits 2048 \
 --outfile /etc/ldap/ldap01_slapd_key.pem
 
-cat > /etc/ldap/ldap01.info <<EOF
+cat > /etc/ssl/ldap01.info <<EOF
 organization = Example Company
 cn = ldap01.example.com
 tls_www_server

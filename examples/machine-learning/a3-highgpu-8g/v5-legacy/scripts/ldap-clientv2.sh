@@ -12,6 +12,7 @@ fi
 set -e
 # Update and install required packages
 apt-get update -y
+
 DEBIAN_FRONTEND=noninteractive apt-get install -y apparmor ldap-utils ldapscripts
 
 systemctl enable apparmor
@@ -60,9 +61,6 @@ EOF
 
 echo -n "${LDAP_ADMIN_PASSWORD}" > /etc/ldapscripts/ldapscripts.passwd
 chmod 400 /etc/ldapscripts/ldapscripts.passwd
-# Add base entries
-ldapadd -x -D "cn=admin,dc=$(echo ${LDAP_DOMAIN} | sed 's/\./,dc=/g')" -w ${LDAP_ADMIN_PASSWORD} -f /tmp/base.ldif
-
 # Configure LDAP client
 cat > /etc/ldap/ldap.conf <<EOF
 BASE dc=$(echo ${LDAP_DOMAIN} | sed 's/\./,dc=/g')

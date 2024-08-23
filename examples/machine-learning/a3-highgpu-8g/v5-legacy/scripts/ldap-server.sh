@@ -10,7 +10,6 @@ set -e
 apt-get update -y
 DEBIAN_FRONTEND=noninteractive apt-get install -y slapd apparmor ldap-utils ldapscripts
 
-
 systemctl enable apparmor
 systemctl start apparmor
 # Pre-seed slapd configuration

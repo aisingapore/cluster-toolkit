@@ -5,7 +5,8 @@ set -e
 
 export DEBIAN_FRONTEND=noninteractive
 
-apt install sssd-ldap ldap-utils -y
+apt install sssd-ldap ldap-utils sssd-tools -y
+
 
 cat > /etc/sssd/sssd.conf <<EOF
 [sssd]

@@ -73,4 +73,11 @@ EOF
 echo -n "${LDAP_ADMIN_PASSWORD}" > /etc/ldapscripts/ldapscripts.passwd
 chmod 400 /etc/ldapscripts/ldapscripts.passwd
 
+# Configure LDAP client
+cat > /etc/ldap/ldap.conf <<EOF
+BASE dc=$(echo ${LDAP_DOMAIN} | sed 's/\./,dc=/g')
+URI ldap://${LDAP_SERVER_IP}
+TLS_CACERT /etc/ssl/certs/ca-certificates.crt
+EOF
+
 echo "LDAP client installation and configuration completed."

@@ -60,7 +60,7 @@ resource "google_compute_instance" "ldap_server" {
   network_interface {
     network    = "projects/projectseald/global/networks/slurm-a3-base-sysnet"
     subnetwork = "projects/projectseald/regions/us-west1/subnetworks/slurm-a3-base-sysnet-subnet"
-
+    network_ip = "172.16.0.1"
     access_config {
       nat_ip = google_compute_address.static_ip.address
     }

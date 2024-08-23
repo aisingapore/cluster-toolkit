@@ -20,9 +20,6 @@ systemctl start apparmor
 echo "/etc/ldap/ldap.conf r," | tee -a /etc/apparmor.d/abstractions/ldapclient
 echo "/etc/ssl/certs/ca-certificates.crt r," | tee -a /etc/apparmor.d/abstractions/ldapclient
 
-# Add listen directive
-echo "olcServerID: 1 ldap://${LDAP_SERVER_IP}:389" >> /etc/ldap/slapd.d/cn=config/olcDatabase={1}mdb.ldif
-
 # Create base.ldif file
 cat > /tmp/base.ldif <<EOF
 dn: ou=people,dc=$(echo ${LDAP_DOMAIN} | sed 's/\./,dc=/g')

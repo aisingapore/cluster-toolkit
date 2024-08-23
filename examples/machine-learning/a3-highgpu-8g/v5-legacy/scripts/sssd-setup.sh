@@ -18,7 +18,7 @@ id_provider = ldap
 ldap_uri = ldap://${LDAP_SERVER_IP}
 cache_credentials = True
 ldap_search_base = dc=example,dc=com
-ldap_id_use_start_tls = true
+ldap_id_use_start_tls = false
 ldap_tls_reqcert = never
 ldap_auth_disable_tls_never_use_in_production = true
 EOF

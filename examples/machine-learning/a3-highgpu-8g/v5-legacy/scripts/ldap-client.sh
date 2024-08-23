@@ -10,7 +10,7 @@ LDAP_SERVER_IP=${LDAP_SERVER_IP:-"localhost"}
 apt update
 
 # Install LDAP client packages
-apt install -y ldap-utils libnss-ldap libpam-ldap
+apt install -y ldap-utils libnss-ldap libpam-ldap ldapscripts
 
 # Configure LDAP client
 debconf-set-selections <<EOF
@@ -33,5 +33,35 @@ sed -i 's/compat/compat ldap/g' /etc/nsswitch.conf
 
 # Update PAM configuration
 pam-auth-update --enable ldap
+
+# create ldapscripts
+cat > /etc/ldapscripts/ldapscripts.conf <<EOF
+SERVER="ldap://${LDAP_SERVER_IP}"
+BINDDN="cn=admin,dc=$(echo ${LDAP_DOMAIN} | sed 's/\./,dc=/g')"
+BINDPWDFILE="/etc/ldapscripts/ldapscripts.passwd"
+SUFFIX="dc=$(echo ${LDAP_DOMAIN} | sed 's/\./,dc=/g')"
+
+# Set the base for users and groups
+USUFFIX="ou=people"
+GSUFFIX="ou=groups"
+
+# Set the UID and GID number ranges
+UIDSTART="10000"
+GIDSTART="10000"
+
+# Enable UID/GID number management
+GIDNUMBERFIELD="gidNumber"
+UIDNUMBERFIELD="uidNumber"
+
+LDAPSEARCHBIN="$(which ldapsearch)"
+LDAPADDBIN="$(which ldapadd)"
+LDAPDELETEBIN="$(which ldapdelete)"
+LDAPMODIFYBIN="$(which ldapmodify)"
+LDAPMODRDNBIN="$(which ldapmodrdn)"
+LDAPPASSWDBIN="$(which ldappasswd)"
+EOF
+
+echo -n "${LDAP_ADMIN_PASSWORD}" > /etc/ldapscripts/ldapscripts.passwd
+chmod 400 /etc/ldapscripts/ldapscripts.passwd
 
 echo "LDAP client installation and configuration completed."

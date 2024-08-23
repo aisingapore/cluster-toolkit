@@ -1,11 +1,20 @@
 #!/bin/bash
 
+set -e
+
 # Set variables
 LDAP_DOMAIN=${LDAP_DOMAIN:-"example.com"}
 LDAP_ORGANIZATION=${LDAP_ORGANIZATION:-"Example Org"}
 LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD:-"adminpassword"}
-LDAP_SERVER_IP=${LDAP_SERVER_IP:-"localhost"}
+# LDAP_SERVER_IP=${LDAP_SERVER_IP:-"localhost"}
+# force error if no LDAP_SERVER_IP is set
 
+if [ -z "${LDAP_SERVER_IP}" ]; then
+  echo "LDAP_SERVER_IP is not set. Please set this variable before running the script."
+  exit 1
+fi
+
+export DEBIAN_FRONTEND=noninteractive
 # Update package list
 apt update
 

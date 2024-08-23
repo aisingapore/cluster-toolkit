@@ -7,7 +7,6 @@ export DEBIAN_FRONTEND=noninteractive
 
 apt install sssd-ldap ldap-utils sssd-tools -y
 
-
 cat > /etc/sssd/sssd.conf <<EOF
 [sssd]
 config_file_version = 2

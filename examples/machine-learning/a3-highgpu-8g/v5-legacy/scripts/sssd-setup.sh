@@ -19,6 +19,7 @@ auth_provider = ldap
 ldap_uri = ldap://${LDAP_SERVER_IP}
 cache_credentials = True
 ldap_search_base = dc=example,dc=com
+ldap_id_use_start_tls = true
 ldap_tls_reqcert = never
 EOF
 

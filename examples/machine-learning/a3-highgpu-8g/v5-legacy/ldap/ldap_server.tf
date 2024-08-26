@@ -58,21 +58,15 @@ resource "google_compute_instance" "ldap_server" {
   }
 
   network_interface {
-    network    = "projects/projectseald/global/networks/slurm-a3-base-sysnet"
-    subnetwork = "projects/projectseald/regions/us-west1/subnetworks/slurm-a3-base-sysnet-subnet"
-    network_ip = "172.16.0.1"
+    network    = "https://www.googleapis.com/compute/v1/projects/projectseald/global/networks/slurm-a3-base-sysnet"
+    subnetwork = "https://www.googleapis.com/compute/v1/projects/projectseald/regions/us-west1/subnetworks/slurm-a3-base-sysnet-subnet"
+    network_ip = "172.16.0.42"
     access_config {
       nat_ip = google_compute_address.static_ip.address
     }
   }
 
-  # metadata_startup_script = <<-EOF
-  #   #!/bin/bash
-  #   apt-get update
-  #   apt-get install -y slapd ldap-utils
-    
-  #   # Additional configuration steps would go here
-  # EOF
+  metadata_startup_script = file("startup-server.sh")
 
   # metadata = {
   #   ssh-keys = "username:ssh-rsa your-public-ssh-key"

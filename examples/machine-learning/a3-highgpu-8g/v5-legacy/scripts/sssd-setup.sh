@@ -7,20 +7,22 @@ export DEBIAN_FRONTEND=noninteractive
 
 apt install sssd-ldap ldap-utils sssd-tools -y
 
-
 cat > /etc/sssd/sssd.conf <<EOF
 [sssd]
 config_file_version = 2
 domains = example.com
+services = nss, pam
 
 [domain/example.com]
 id_provider = ldap
-ldap_uri = ldap://${LDAP_SERVER_IP}
+auth_provider = ldap
+ldap_uri = ldap://172.16.0.42
 cache_credentials = True
 ldap_search_base = dc=example,dc=com
-ldap_id_use_start_tls = true
-ldap_tls_reqcert = never
-ldap_auth_disable_tls_never_use_in_production = true
+ldap_default_bind_dn = cn=admin,dc=example,dc=com
+ldap_default_authtok_type = password
+ldap_default_authtok = adminpassword
+debug_level = 9
 EOF
 
 chmod 0600 /etc/sssd/sssd.conf

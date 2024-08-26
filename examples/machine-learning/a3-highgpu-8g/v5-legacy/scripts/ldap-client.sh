@@ -6,8 +6,7 @@ set -e
 LDAP_DOMAIN=${LDAP_DOMAIN:-"example.com"}
 LDAP_ORGANIZATION=${LDAP_ORGANIZATION:-"Example Org"}
 LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD:-"adminpassword"}
-# LDAP_SERVER_IP=${LDAP_SERVER_IP:-"localhost"}
-# force error if no LDAP_SERVER_IP is set
+LDAP_SERVER_IP="172.16.0.42"
 
 if [ -z "${LDAP_SERVER_IP}" ]; then
   echo "LDAP_SERVER_IP is not set. Please set this variable before running the script."

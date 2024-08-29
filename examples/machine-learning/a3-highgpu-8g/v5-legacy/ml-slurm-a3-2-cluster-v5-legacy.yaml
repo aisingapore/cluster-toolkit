@@ -170,7 +170,7 @@ deployment_groups:
       exclusive: false
       is_default: true
       partition_conf:
-        OverSubscribe: EXCLUSIVE
+        OverSubscribe: YES #EXCLUSIVE
     
   - id: controller_startup
     source: modules/scripts/startup-script

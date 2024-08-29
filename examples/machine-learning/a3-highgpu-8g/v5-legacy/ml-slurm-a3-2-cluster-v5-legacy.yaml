@@ -75,6 +75,13 @@ deployment_groups:
       remote_mount: $(vars.remote_mount_homefs)
       local_mount: $(vars.local_mount_homefs)
 
+  - id: aisingaporefs
+    source: modules/file-system/pre-existing-network-storage
+    settings:
+      server_ip: 192.168.1.2
+      remote_mount: $(vars.remote_mount_homefs)
+      local_mount: /shared/aisingapore
+
 #  - id: nfs2
 #    source: modules/file-system/pre-existing-network-storage
 #    settings:
@@ -155,6 +162,7 @@ deployment_groups:
     - a3_node_group
     - sysnet
     - homefs
+    - aisingaporefs
 #    - nfs2
     settings:
       partition_name: $(vars.a3_partition_name)
@@ -201,6 +209,7 @@ deployment_groups:
     - a3_partition
     # - debug_partition
     - homefs
+    - aisingaporefs
 #    - nfs2
     settings:
       machine_type: c2-standard-16  # more powerful VM

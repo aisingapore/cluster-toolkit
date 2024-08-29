@@ -66,3 +66,16 @@ deployment_groups:
       reserved_ip_range: $(vars.filestore_ip_range)
     outputs:
     - network_storage
+
+  - id: aisingaporefs
+    source: modules/file-system/filestore
+    use:
+    - sysnet
+    settings:
+      # to increase storage size and type
+      filestore_tier: HIGH_SCALE_SSD
+      size_gb: 15360
+      local_mount: /shared/aisingapore
+      reserved_ip_range: 192.168.1.0/24
+    outputs:
+    - network_storage 

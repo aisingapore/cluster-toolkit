@@ -190,6 +190,7 @@ deployment_groups:
     - gpunets
     - compute_sa
     - a3_startup
+    - aisingaporefs
     settings:
       reservation_name: $(vars.a3_reservation_name)
       maintenance_interval: $(vars.a3_maintenance_interval)
@@ -210,7 +211,6 @@ deployment_groups:
     source: community/modules/compute/schedmd-slurm-gcp-v6-partition
     use:
     - a3_nodeset
-    - aisingaporefs
     settings:
       partition_name: $(vars.a3_partition_name)
       exclusive: false

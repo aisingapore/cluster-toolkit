@@ -30,8 +30,12 @@ vars:
   network_name_system: slurm-a3-base-sysnet
   subnetwork_name_system: slurm-a3-base-sysnet-subnet
   slurm_cluster_name: slurm0
-  source_image_project_id: injae-sandbox-340804     # use value supplied by Google Cloud staff
-  source_image: slurm-dlvm-20240423t233339z         # use value supplied by Google Cloud staff
+#  project_id: deeplearning-platform
+#  image: dlvm-tcpd-cu120-648491853-ubuntu-2004-py310
+#  source_image_project_id: injae-sandbox-340804     # use value supplied by Google Cloud staff
+#  source_image: slurm-dlvm-20240423t233339z         # use value supplied by Google Cloud staff
+  source_image_project_id: deeplearning-platform
+  source_image: dlvm-tcpd-cu120-648491853-ubuntu-2004-py310
 
 deployment_groups:
 - group: build_script

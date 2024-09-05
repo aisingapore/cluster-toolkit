@@ -44,6 +44,12 @@ deployment_groups:
         new_bits: 4
         subnet_private_access: true
         description: primary subnetwork in $(vars.deployment_name)-sysnet
+      firewall_rules:
+      - name: ldap-my-server
+        direction: INGRESS
+        allow:
+        - protocol: tcp
+          ports: [22, 389, 636]
     outputs:
     - network_name
     - subnetwork_name
@@ -53,9 +59,23 @@ deployment_groups:
     use:
     - sysnet
     settings:
-      filestore_tier: BASIC_SSD # to increase storage type
-      size_gb: 2560
+      # to increase storage type
+      filestore_tier: ZONAL
+      size_gb: 1024
       local_mount: /home
       reserved_ip_range: $(vars.filestore_ip_range)
+    outputs:
+    - network_storage
+
+  - id: aisingaporefs
+    source: modules/file-system/filestore
+    use:
+    - sysnet
+    settings:
+      # to increase storage size and type
+      filestore_tier: HIGH_SCALE_SSD
+      size_gb: 15360
+      local_mount: /shared/aisingapore
+      reserved_ip_range: 192.168.1.0/24
     outputs:
     - network_storage

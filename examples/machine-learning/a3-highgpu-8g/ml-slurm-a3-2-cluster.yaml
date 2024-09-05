@@ -28,6 +28,8 @@ vars:
   server_ip_homefs: 192.168.0.2 ## MUST set to IP address of Filestore instance from base deployment!
   remote_mount_homefs: /nfsshare
   local_mount_homefs: /home
+  aisg_nfs_server_ip: 192.168.1.2
+  aisg_nfs_local_mount: /shared/aisingapore
   zones: []
   disk_size_gb: 200
   instance_image:
@@ -36,8 +38,8 @@ vars:
   instance_image_custom: true
   slurm_cluster_name: slurm0
   enable_cleanup_compute: true
-  a3_partition_name: a3-test
-  a3_static_cluster_size: 32
+  a3_partition_name: a3test
+  a3_static_cluster_size: 5
   # a3_reservation_name must be specified; if Google staff have provided you
   # with a reservation name, use it. Otherwise supply user-created reservation.
   a3_reservation_name: reservation-20240806-082612
@@ -78,6 +80,15 @@ deployment_groups:
       remote_mount: $(vars.remote_mount_homefs)
       local_mount: $(vars.local_mount_homefs)
 
+  - id: aisingaporefs
+    source: modules/file-system/pre-existing-network-storage
+    settings:
+      #server_ip: 192.168.1.2
+      #local_mount: /shared/aisingapore
+      server_ip: $(vars.aisg_nfs_server_ip)
+      remote_mount: $(vars.remote_mount_homefs)
+      local_mount: $(vars.aisg_nfs_local_mount)
+
   - id: compute_sa
     source: community/modules/project/service-account
     settings:
@@ -87,24 +98,24 @@ deployment_groups:
       - monitoring.metricWriter
       - storage.objectAdmin
 
-  - id: debug_nodeset
-    source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
-    use:
-    - sysnet
-    - compute_sa
-    settings:
-      node_count_static: 0
-      node_count_dynamic_max: 4
-      machine_type: n2-standard-2
-      enable_placement: false
+#  - id: debug_nodeset
+#    source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
+#    use:
+#    - sysnet
+#    - compute_sa
+#    settings:
+#      node_count_static: 0
+#      node_count_dynamic_max: 4
+#      machine_type: n2-standard-2
+#      enable_placement: false
 
-  - id: debug_partition
-    source: community/modules/compute/schedmd-slurm-gcp-v6-partition
-    use:
-    - debug_nodeset
-    settings:
-      partition_name: debug
-      exclusive: false
+#  - id: debug_partition
+#    source: community/modules/compute/schedmd-slurm-gcp-v6-partition
+#    use:
+#    - debug_nodeset
+#    settings:
+#      partition_name: debug
+#      exclusive: false
 
   - id: a3_startup
     source: modules/scripts/startup-script
@@ -187,7 +198,7 @@ deployment_groups:
       node_count_dynamic_max: 0
       disk_type: pd-ssd
       machine_type: a3-highgpu-8g
-      enable_public_ips: true
+      enable_public_ips: true   # to disable after debugging
       enable_smt: true
       node_conf:
         CoresPerSocket: 52
@@ -199,6 +210,7 @@ deployment_groups:
     source: community/modules/compute/schedmd-slurm-gcp-v6-partition
     use:
     - a3_nodeset
+    - aisingaporefs
     settings:
       partition_name: $(vars.a3_partition_name)
       exclusive: false
@@ -229,24 +241,25 @@ deployment_groups:
           # allows basic enroot testing on login/controller nodes (reduced I/O)
           rm -f /etc/enroot/enroot.conf
 
-  - id: slurm_login
-    source: community/modules/scheduler/schedmd-slurm-gcp-v6-login
-    use: [sysnet]
-    settings:
-      name_prefix: login
-      disk_type: pd-balanced
-      machine_type: c2-standard-4
-      enable_login_public_ips: true
-      num_instances: 0
+#  - id: slurm_login
+#    source: community/modules/scheduler/schedmd-slurm-gcp-v6-login
+#    use: [sysnet]
+#    settings:
+#      name_prefix: login
+#      disk_type: pd-balanced
+#      machine_type: c2-standard-4
+#      enable_login_public_ips: true
+#      num_instances: 0
 
   - id: slurm_controller
     source: community/modules/scheduler/schedmd-slurm-gcp-v6-controller
     use:
     - sysnet
     - a3_partition
-    - debug_partition
-    - slurm_login
+#    - debug_partition
+#    - slurm_login
     - homefs
+    - aisingaporefs
     settings:
       cloud_parameters:
         resume_rate: 0

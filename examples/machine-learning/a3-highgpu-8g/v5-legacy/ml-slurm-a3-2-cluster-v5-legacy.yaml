@@ -31,6 +31,8 @@ vars:
   local_mount_homefs: /home
   aisg_nfs_server_ip: 192.168.1.2
   aisg_nfs_local_mount: /shared/aisingapore
+  gojek_remote_mount_homefs: $(vars.remote_mount_homefs)/gojek
+  gojek_nfs_local_mount: /shared/gojek
 #  local_mount_nfs2: /nfs2
   zones:
   - $(vars.zone)
@@ -84,6 +86,12 @@ deployment_groups:
       remote_mount: $(vars.remote_mount_homefs)
       local_mount: $(vars.aisg_nfs_local_mount)
 
+  - id: gojekfs
+    source: modules/file-system/pre-existing-network-storage
+    settings:
+      server_ip: $(vars.aisg_nfs_server_ip)
+      remote_mount: $(vars.gojek_remote_mount_homefs)
+      local_mount: $(vars.gojek_nfs_local_mount)
 #  - id: nfs2
 #    source: modules/file-system/pre-existing-network-storage
 #    settings:
@@ -165,6 +173,7 @@ deployment_groups:
     - sysnet
     - homefs
     - aisingaporefs
+    - gojekfs
 #    - nfs2
     settings:
       partition_name: $(vars.a3_partition_name)
@@ -173,6 +182,7 @@ deployment_groups:
       is_default: true
       partition_conf:
         OverSubscribe: YES #EXCLUSIVE
+        DefCpuPerGPU: 26
     
   - id: controller_startup
     source: modules/scripts/startup-script
@@ -212,6 +222,7 @@ deployment_groups:
     # - debug_partition
     - homefs
     - aisingaporefs
+    - gojekfs
 #    - nfs2
     settings:
       machine_type: c2-standard-16  # more powerful VM

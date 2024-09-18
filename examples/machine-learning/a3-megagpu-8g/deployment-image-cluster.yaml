@@ -16,20 +16,21 @@
 terraform_backend_defaults:
   type: gcs
   configuration:
-    bucket: customer-bucket
+    bucket: proj-seald-terraform
 
 vars:
-  project_id: customer-project
-  region: customer-region
-  zone: customer-zone
+  project_id: projectseald
+  region: us-west1
+  zone: us-west1-b
   network_name_system: a3mega-sys-net
   subnetwork_name_system: a3mega-sys-subnet
   enable_ops_agent: true
   enable_nvidia_dcgm: true
-  disk_size_gb: 200
+  disk_size_gb: 500
   final_image_family: slurm-a3mega
   slurm_cluster_name: a3mega
-  a3mega_reservation_name: ""
+  a3mega_reservation_name: "project-seald-reservation-20240918"
   a3mega_maintenance_interval: ""
-  a3mega_cluster_size: 2
+  a3mega_cluster_size: 5
   server_ip_homefs: "" # must add value from output of base deployment!
+  aisg_server_ip_homefs: "" # must add value from output of base deployment!

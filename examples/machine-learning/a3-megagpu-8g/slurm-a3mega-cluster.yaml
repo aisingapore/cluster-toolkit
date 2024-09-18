@@ -24,6 +24,8 @@ vars:
   enable_placement: false
   remote_mount_homefs: /nfsshare
   local_mount_homefs: /home
+  aisg_remote_mount_homefs: /nfsshare
+  aisg_local_mount_homefs: /shared
   instance_image_custom: true
   instance_image:
     family: $(vars.final_image_family)
@@ -65,21 +67,29 @@ deployment_groups:
       local_mount: $(vars.local_mount_homefs)
       mount_options: "defaults,hard"
 
-  - id: debug_nodeset
-    use: [sysnet]
-    source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
+  - id: aisingaporefs
+    source: modules/file-system/pre-existing-network-storage
     settings:
-      node_count_static: 0
-      node_count_dynamic_max: 4
-      machine_type: n2-standard-2
+      server_ip: $(vars.aisg_server_ip_homefs)
+      remote_mount: $(vars.aisg_remote_mount_homefs)
+      local_mount: $(vars.aisg_local_mount_homefs)
+      mount_options: "defaults,hard"
 
-  - id: debug_partition
-    source: community/modules/compute/schedmd-slurm-gcp-v6-partition
-    use:
-    - debug_nodeset
-    settings:
-      partition_name: debug
-      exclusive: false
+  # - id: debug_nodeset
+  #   use: [sysnet]
+  #   source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
+  #   settings:
+  #     node_count_static: 0
+  #     node_count_dynamic_max: 4
+  #     machine_type: n2-standard-2
+
+  # - id: debug_partition
+  #   source: community/modules/compute/schedmd-slurm-gcp-v6-partition
+  #   use:
+  #   - debug_nodeset
+  #   settings:
+  #     partition_name: debug
+  #     exclusive: false
 
   - id: a3mega_startup
     source: modules/scripts/startup-script
@@ -200,7 +210,8 @@ deployment_groups:
       exclusive: false
       is_default: true
       partition_conf:
-        OverSubscribe: EXCLUSIVE
+        OverSubscribe: YES
+        DefCpuPerGPU: 26
         ResumeTimeout: 900
         SuspendTimeout: 600
 
@@ -244,21 +255,23 @@ deployment_groups:
       name_prefix: login
       disk_type: pd-balanced
       machine_type: c2-standard-4
-
+      enable_login_public_ips: false
+      num_instances: 0
   - id: slurm_controller
     source: community/modules/scheduler/schedmd-slurm-gcp-v6-controller
     use:
     - sysnet
     - a3mega_partition
-    - debug_partition
     - slurm_login
     - homefs
+    - aisingaporefs
     - data-bucket
     settings:
-      machine_type: c2-standard-8
+      machine_type: c3-standard-22
       enable_cleanup_compute: true
       enable_external_prolog_epilog: true
       slurm_conf_tpl: modules/embedded/community/modules/scheduler/schedmd-slurm-gcp-v6-controller/etc/long-prolog-slurm.conf.tpl
+      enable_controller_public_ips: true
       controller_startup_script: $(controller_startup.startup_script)
       login_startup_script: |
         #!/bin/bash

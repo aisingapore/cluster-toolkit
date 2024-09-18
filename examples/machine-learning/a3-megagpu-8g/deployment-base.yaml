@@ -16,12 +16,12 @@
 terraform_backend_defaults:
   type: gcs
   configuration:
-    bucket: customer-bucket
+    bucket: proj-seald-terraform
 
 vars:
   deployment_name: a3mega-base
-  project_id: customer-project
-  region: customer-region
-  zone: customer-zone
+  project_id: projectseald
+  region: us-west1
+  zone: us-west1-b
   network_name_system: a3mega-sys-net
   subnetwork_name_system: a3mega-sys-subnet

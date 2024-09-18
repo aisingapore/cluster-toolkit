@@ -44,14 +44,25 @@ deployment_groups:
     source: community/modules/network/private-service-access
     use:
     - sysnet
-  - id: homefs
+  - id: aisingaporefs
     source: modules/file-system/filestore
     use:
     - sysnet
     - private_service_access
     settings:
       filestore_tier: HIGH_SCALE_SSD
-      size_gb: 10240
-      local_mount: /home
+      size_gb: 15360
+      local_mount: /shared
     outputs:
     - network_storage
+  - id: homefs
+    source: modules/file-system/filestore
+    use:
+    - sysnet
+    - private_service_access
+    settings:
+      filestore_tier: BASIC_SSD
+      size_gb: 1024
+      local_mount: /home
+    outputs:
+    - network_storage2

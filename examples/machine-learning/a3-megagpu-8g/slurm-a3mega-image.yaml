@@ -365,7 +365,7 @@ deployment_groups:
     settings:
       # building this image does not require a GPU-enabled VM but must *not* be
       # run on a N-series VM otherwise, the "open" drivers will not install
-      machine_type: c2-standard-8
+      machine_type: c2d-standard-32
       source_image: $(vars.source_image)
       image_family: $(vars.final_image_family)
       disk_size: $(vars.disk_size_gb)

@@ -61,8 +61,8 @@ deployment_groups:
     - sysnet
     - private_service_access
     settings:
-      filestore_tier: BASIC_SSD
+      filestore_tier: ZONAL
       size_gb: 1024
       local_mount: /home
     outputs:
-    - network_storage2
+    - network_storage

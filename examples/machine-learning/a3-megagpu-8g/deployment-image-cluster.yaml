@@ -32,5 +32,5 @@ vars:
   a3mega_reservation_name: "project-seald-reservation-20240918"
   a3mega_maintenance_interval: ""
   a3mega_cluster_size: 5
-  server_ip_homefs: "" # must add value from output of base deployment!
-  aisg_server_ip_homefs: "" # must add value from output of base deployment!
+  server_ip_homefs: "10.66.0.66" # must add value from output of base deployment!
+  aisg_server_ip_homefs: "10.66.0.2" # must add value from output of base deployment!

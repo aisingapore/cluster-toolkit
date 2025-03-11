@@ -62,3 +62,14 @@ deployment_groups:
       local_mount: /home
     outputs:
     - network_storage
+  - id: aisingaporefs
+    source: modules/file-system/filestore
+    use:
+    - sysnet
+    - private_service_access
+    settings:
+      filestore_tier: HIGH_SCALE_SSD
+      size_gb: 15360
+      local_mount: /shared
+    outputs:
+    - aisingapore_network_storage

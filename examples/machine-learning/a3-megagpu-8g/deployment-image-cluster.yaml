@@ -16,10 +16,10 @@
 terraform_backend_defaults:
   type: gcs
   configuration:
-    bucket: customer-bucket
+    bucket: gcp64-terraform
 
 vars:
-  project_id: customer-project
+  project_id: gcp64-452302
   region: customer-region
   zone: customer-zone
   network_name_system: a3mega-sys-net
@@ -31,5 +31,6 @@ vars:
   slurm_cluster_name: a3mega
   a3mega_reservation_name: ""
   a3mega_maintenance_interval: ""
-  a3mega_cluster_size: 2
+  a3mega_cluster_size: 8
   server_ip_homefs: "" # must add value from output of base deployment!
+  aisg_server_ip_homefs: "" # must add value from output of base deployment!

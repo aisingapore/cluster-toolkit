@@ -16,11 +16,11 @@
 terraform_backend_defaults:
   type: gcs
   configuration:
-    bucket: customer-bucket
+    bucket: gcp64-terraform
 
 vars:
   deployment_name: a3mega-base
-  project_id: customer-project
+  project_id: gcp64-452302
   region: customer-region
   zone: customer-zone
   network_name_system: a3mega-sys-net

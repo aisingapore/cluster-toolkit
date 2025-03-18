@@ -57,8 +57,8 @@ deployment_groups:
     - sysnet
     - private_service_access
     settings:
-      filestore_tier: HIGH_SCALE_SSD
-      size_gb: 10240
+      filestore_tier: ZONAL
+      size_gb: 1024
       local_mount: /home
     outputs:
     - network_storage
@@ -69,7 +69,7 @@ deployment_groups:
     - private_service_access
     settings:
       filestore_tier: HIGH_SCALE_SSD
-      size_gb: 15360
+      size_gb: 10240
       local_mount: /shared
     outputs:
-    - aisingapore_network_storage
+    - network_storage

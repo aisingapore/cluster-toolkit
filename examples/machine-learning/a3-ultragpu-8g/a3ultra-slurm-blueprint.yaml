@@ -334,7 +334,7 @@ deployment_groups:
       filestore_tier: ZONAL
       size_gb: 1024
       local_mount: /home
-      reserved_ip_range: $(vars.filestore_ip_range)
+      reserved_ip_range: 192.168.34.0/24
       deletion_protection:
         enabled: true
         reason: Avoid data loss
@@ -673,6 +673,7 @@ deployment_groups:
     source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
     use: [a3ultra-slurm-net-0, a3ultra_startup]
     settings:
+      name: a3u-ns-a
       bandwidth_tier: gvnic_enabled
       machine_type: a3-ultragpu-8g
 
@@ -716,6 +717,7 @@ deployment_groups:
     source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
     use: [a3ultra-slurm-net-0, a3ultra_startup]
     settings:
+      name: a3u-ns-c
       bandwidth_tier: gvnic_enabled
       machine_type: a3-ultragpu-8g
 
@@ -727,7 +729,7 @@ deployment_groups:
       on_host_maintenance: TERMINATE
 
       #Provisioning models
-      reservation_name: futres-20260305-003107-1vm-c
+      reservation_name: futres-20260305-004136-1vm-c
       enable_spot_vm: $(vars.a3u_enable_spot_vm)
       dws_flex:
         enabled: $(vars.a3u_dws_flex_enabled)
@@ -759,6 +761,7 @@ deployment_groups:
     source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
     use: [a3ultra-slurm-net-0, a3ultra_startup]
     settings:
+      name: a3u-ns-d
       bandwidth_tier: gvnic_enabled
       machine_type: a3-ultragpu-8g
 
@@ -770,7 +773,7 @@ deployment_groups:
       on_host_maintenance: TERMINATE
 
       #Provisioning models
-      reservation_name: futres-20260305-003107-1vm-d
+      reservation_name: futres-20260305-004313-1vm-d
       enable_spot_vm: $(vars.a3u_enable_spot_vm)
       dws_flex:
         enabled: $(vars.a3u_dws_flex_enabled)
@@ -802,6 +805,7 @@ deployment_groups:
     source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
     use: [a3ultra-slurm-net-0, a3ultra_startup]
     settings:
+      name: a3u-ns-e
       bandwidth_tier: gvnic_enabled
       machine_type: a3-ultragpu-8g
 
@@ -813,7 +817,7 @@ deployment_groups:
       on_host_maintenance: TERMINATE
 
       #Provisioning models
-      reservation_name: futres-20260305-003107-1vm-e
+      reservation_name: futres-20260305-004435-1vm-e
       enable_spot_vm: $(vars.a3u_enable_spot_vm)
       dws_flex:
         enabled: $(vars.a3u_dws_flex_enabled)
@@ -845,6 +849,7 @@ deployment_groups:
     source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
     use: [a3ultra-slurm-net-0, a3ultra_startup]
     settings:
+      name: a3u-ns-f
       bandwidth_tier: gvnic_enabled
       machine_type: a3-ultragpu-8g
 
@@ -856,7 +861,7 @@ deployment_groups:
       on_host_maintenance: TERMINATE
 
       #Provisioning models
-      reservation_name: futres-20260305-003107-1vm-f
+      reservation_name: futres-20260305-004534-1vm-f
       enable_spot_vm: $(vars.a3u_enable_spot_vm)
       dws_flex:
         enabled: $(vars.a3u_dws_flex_enabled)
@@ -888,6 +893,7 @@ deployment_groups:
     source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
     use: [a3ultra-slurm-net-0, a3ultra_startup]
     settings:
+      name: a3u-ns-g
       bandwidth_tier: gvnic_enabled
       machine_type: a3-ultragpu-8g
 
@@ -899,7 +905,7 @@ deployment_groups:
       on_host_maintenance: TERMINATE
 
       #Provisioning models
-      reservation_name: futres-20260305-003107-1vm-g
+      reservation_name: futres-20260305-004621-1vm-g
       enable_spot_vm: $(vars.a3u_enable_spot_vm)
       dws_flex:
         enabled: $(vars.a3u_dws_flex_enabled)
@@ -942,7 +948,7 @@ deployment_groups:
   #     on_host_maintenance: TERMINATE
 
   #     #Provisioning models
-  #     reservation_name: futres-20260305-003107-1vm-h
+  #     reservation_name: futres-20260305-004715-1vm-h
   #     enable_spot_vm: $(vars.a3u_enable_spot_vm)
   #     dws_flex:
   #       enabled: $(vars.a3u_dws_flex_enabled)

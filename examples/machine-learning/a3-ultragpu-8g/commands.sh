@@ -11,4 +11,4 @@ gcloud storage buckets update gs://gcp64-03-2026-terraform --versioning --projec
 cd /home/ubuntu/gcp64-03-2026/cluster-toolkit-gcp64-03-2026
 
 # skip auto-approve first
-./gcluster deploy -d examples/machine-learning/a3-ultragpu-8g/a3ultra-slurm-deployment.yaml examples/machine-learning/a3-ultragpu-8g/a3ultra-slurm-blueprint.yaml --auto-approve
+./gcluster deploy -d examples/machine-learning/a3-ultragpu-8g/a3ultra-slurm-deployment.yaml examples/machine-learning/a3-ultragpu-8g/a3ultra-slurm-blueprint.yaml --auto-approve -w --skip "image"

@@ -6,7 +6,7 @@ gcloud storage buckets create gs://gcp64-03-2026-terraform \
 gcloud storage buckets update gs://gcp64-03-2026-terraform --versioning --project=projectseald
 
 # check gcluster version
-./gcluster version
+./gcluster --version
 
 cd /home/ubuntu/gcp64-03-2026/cluster-toolkit-gcp64-03-2026
 

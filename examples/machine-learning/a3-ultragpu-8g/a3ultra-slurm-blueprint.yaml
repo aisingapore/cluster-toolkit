@@ -20,7 +20,7 @@ vars:
   project_id: projectseald
   region: us-south1
   zone: us-south1-b
-  a3u_cluster_size: 8
+  a3u_cluster_size: 7
   # Image settings
   base_image:
     project: ubuntu-os-accelerator-images
@@ -44,7 +44,7 @@ vars:
   base_network_name: $(vars.deployment_name)
 
   #Provisioning models (set to true or fill in reservation name, pick only one)
-  a3u_reservation_name: "futres-20260305-003107-2vm-a,futres-20260305-003107-1vm-b,futres-20260305-003107-1vm-c,futres-20260305-003107-1vm-d,futres-20260305-003107-1vm-e, futres-20260305-003107-1vm-f,futres-20260305-003107-1vm-g,futres-20260305-003107-1vm-h" # supply reservation name
+  # a3u_reservation_name: ["futres-20260305-003107-2vm-a","futres-20260305-003107-1vm-b","futres-20260305-003107-1vm-c","futres-20260305-003107-1vm-d","futres-20260305-003107-1vm-e","futres-20260305-003107-1vm-f","futres-20260305-003107-1vm-g","futres-20260305-003107-1vm-h"]
   a3u_dws_flex_enabled: false
   a3u_enable_spot_vm: false
 
@@ -626,7 +626,50 @@ deployment_groups:
                 state: "{{ 'started' if enable_nvidia_persistenced else 'stopped' }}"
                 enabled: "{{ enable_nvidia_persistenced }}"
 
-  - id: a3_ultra_nodeset
+  # - id: a3_ultra_nodeset
+  #   source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
+  #   use: [a3ultra-slurm-net-0, a3ultra_startup]
+  #   settings:
+  #     bandwidth_tier: gvnic_enabled
+  #     machine_type: a3-ultragpu-8g
+
+  #     enable_public_ips: true
+  #     node_count_static: $(vars.a3u_cluster_size)
+  #     node_count_dynamic_max: 0
+  #     enable_placement: false
+  #     disk_type: hyperdisk-balanced
+  #     on_host_maintenance: TERMINATE
+
+  #     #Provisioning models
+  #     reservation_name: $(vars.a3u_reservation_name)
+  #     enable_spot_vm: $(vars.a3u_enable_spot_vm)
+  #     dws_flex:
+  #       enabled: $(vars.a3u_dws_flex_enabled)
+
+  #     advanced_machine_features:
+  #       threads_per_core: null # Use platform default value
+  #     node_conf:
+  #       CoresPerSocket: 56
+  #       SocketsPerBoard: 2
+  #       ThreadsPerCore: 2
+  #     additional_networks:
+  #       $(concat(
+  #         [{
+  #           network=null,
+  #           subnetwork=a3ultra-slurm-net-1.subnetwork_self_link,
+  #           subnetwork_project=vars.project_id,
+  #           nic_type="GVNIC",
+  #           queue_count=null,
+  #           network_ip="",
+  #           stack_type=null,
+  #           access_config=[],
+  #           ipv6_access_config=[],
+  #           alias_ip_range=[]
+  #         }],
+  #         a3ultra-slurm-rdma-net.subnetwork_interfaces
+  #       ))
+
+  - id: a3_ultra_nodeset_a
     source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
     use: [a3ultra-slurm-net-0, a3ultra_startup]
     settings:
@@ -634,14 +677,14 @@ deployment_groups:
       machine_type: a3-ultragpu-8g
 
       enable_public_ips: true
-      node_count_static: $(vars.a3u_cluster_size)
+      node_count_static: 2
       node_count_dynamic_max: 0
       enable_placement: false
       disk_type: hyperdisk-balanced
       on_host_maintenance: TERMINATE
 
       #Provisioning models
-      reservation_name: $(vars.a3u_reservation_name)
+      reservation_name: futres-20260305-003107-2vm-a
       enable_spot_vm: $(vars.a3u_enable_spot_vm)
       dws_flex:
         enabled: $(vars.a3u_dws_flex_enabled)
@@ -669,10 +712,274 @@ deployment_groups:
           a3ultra-slurm-rdma-net.subnetwork_interfaces
         ))
 
+  - id: a3_ultra_nodeset_c
+    source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
+    use: [a3ultra-slurm-net-0, a3ultra_startup]
+    settings:
+      bandwidth_tier: gvnic_enabled
+      machine_type: a3-ultragpu-8g
+
+      enable_public_ips: true
+      node_count_static: 1
+      node_count_dynamic_max: 0
+      enable_placement: false
+      disk_type: hyperdisk-balanced
+      on_host_maintenance: TERMINATE
+
+      #Provisioning models
+      reservation_name: futres-20260305-003107-1vm-c
+      enable_spot_vm: $(vars.a3u_enable_spot_vm)
+      dws_flex:
+        enabled: $(vars.a3u_dws_flex_enabled)
+
+      advanced_machine_features:
+        threads_per_core: null # Use platform default value
+      node_conf:
+        CoresPerSocket: 56
+        SocketsPerBoard: 2
+        ThreadsPerCore: 2
+      additional_networks:
+        $(concat(
+          [{
+            network=null,
+            subnetwork=a3ultra-slurm-net-1.subnetwork_self_link,
+            subnetwork_project=vars.project_id,
+            nic_type="GVNIC",
+            queue_count=null,
+            network_ip="",
+            stack_type=null,
+            access_config=[],
+            ipv6_access_config=[],
+            alias_ip_range=[]
+          }],
+          a3ultra-slurm-rdma-net.subnetwork_interfaces
+        ))
+
+  - id: a3_ultra_nodeset_d
+    source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
+    use: [a3ultra-slurm-net-0, a3ultra_startup]
+    settings:
+      bandwidth_tier: gvnic_enabled
+      machine_type: a3-ultragpu-8g
+
+      enable_public_ips: true
+      node_count_static: 1
+      node_count_dynamic_max: 0
+      enable_placement: false
+      disk_type: hyperdisk-balanced
+      on_host_maintenance: TERMINATE
+
+      #Provisioning models
+      reservation_name: futres-20260305-003107-1vm-d
+      enable_spot_vm: $(vars.a3u_enable_spot_vm)
+      dws_flex:
+        enabled: $(vars.a3u_dws_flex_enabled)
+
+      advanced_machine_features:
+        threads_per_core: null # Use platform default value
+      node_conf:
+        CoresPerSocket: 56
+        SocketsPerBoard: 2
+        ThreadsPerCore: 2
+      additional_networks:
+        $(concat(
+          [{
+            network=null,
+            subnetwork=a3ultra-slurm-net-1.subnetwork_self_link,
+            subnetwork_project=vars.project_id,
+            nic_type="GVNIC",
+            queue_count=null,
+            network_ip="",
+            stack_type=null,
+            access_config=[],
+            ipv6_access_config=[],
+            alias_ip_range=[]
+          }],
+          a3ultra-slurm-rdma-net.subnetwork_interfaces
+        ))
+
+  - id: a3_ultra_nodeset_e
+    source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
+    use: [a3ultra-slurm-net-0, a3ultra_startup]
+    settings:
+      bandwidth_tier: gvnic_enabled
+      machine_type: a3-ultragpu-8g
+
+      enable_public_ips: true
+      node_count_static: 1
+      node_count_dynamic_max: 0
+      enable_placement: false
+      disk_type: hyperdisk-balanced
+      on_host_maintenance: TERMINATE
+
+      #Provisioning models
+      reservation_name: futres-20260305-003107-1vm-e
+      enable_spot_vm: $(vars.a3u_enable_spot_vm)
+      dws_flex:
+        enabled: $(vars.a3u_dws_flex_enabled)
+
+      advanced_machine_features:
+        threads_per_core: null # Use platform default value
+      node_conf:
+        CoresPerSocket: 56
+        SocketsPerBoard: 2
+        ThreadsPerCore: 2
+      additional_networks:
+        $(concat(
+          [{
+            network=null,
+            subnetwork=a3ultra-slurm-net-1.subnetwork_self_link,
+            subnetwork_project=vars.project_id,
+            nic_type="GVNIC",
+            queue_count=null,
+            network_ip="",
+            stack_type=null,
+            access_config=[],
+            ipv6_access_config=[],
+            alias_ip_range=[]
+          }],
+          a3ultra-slurm-rdma-net.subnetwork_interfaces
+        ))
+
+  - id: a3_ultra_nodeset_f
+    source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
+    use: [a3ultra-slurm-net-0, a3ultra_startup]
+    settings:
+      bandwidth_tier: gvnic_enabled
+      machine_type: a3-ultragpu-8g
+
+      enable_public_ips: true
+      node_count_static: 1
+      node_count_dynamic_max: 0
+      enable_placement: false
+      disk_type: hyperdisk-balanced
+      on_host_maintenance: TERMINATE
+
+      #Provisioning models
+      reservation_name: futres-20260305-003107-1vm-f
+      enable_spot_vm: $(vars.a3u_enable_spot_vm)
+      dws_flex:
+        enabled: $(vars.a3u_dws_flex_enabled)
+
+      advanced_machine_features:
+        threads_per_core: null # Use platform default value
+      node_conf:
+        CoresPerSocket: 56
+        SocketsPerBoard: 2
+        ThreadsPerCore: 2
+      additional_networks:
+        $(concat(
+          [{
+            network=null,
+            subnetwork=a3ultra-slurm-net-1.subnetwork_self_link,
+            subnetwork_project=vars.project_id,
+            nic_type="GVNIC",
+            queue_count=null,
+            network_ip="",
+            stack_type=null,
+            access_config=[],
+            ipv6_access_config=[],
+            alias_ip_range=[]
+          }],
+          a3ultra-slurm-rdma-net.subnetwork_interfaces
+        ))
+
+  - id: a3_ultra_nodeset_g
+    source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
+    use: [a3ultra-slurm-net-0, a3ultra_startup]
+    settings:
+      bandwidth_tier: gvnic_enabled
+      machine_type: a3-ultragpu-8g
+
+      enable_public_ips: true
+      node_count_static: 1
+      node_count_dynamic_max: 0
+      enable_placement: false
+      disk_type: hyperdisk-balanced
+      on_host_maintenance: TERMINATE
+
+      #Provisioning models
+      reservation_name: futres-20260305-003107-1vm-g
+      enable_spot_vm: $(vars.a3u_enable_spot_vm)
+      dws_flex:
+        enabled: $(vars.a3u_dws_flex_enabled)
+
+      advanced_machine_features:
+        threads_per_core: null # Use platform default value
+      node_conf:
+        CoresPerSocket: 56
+        SocketsPerBoard: 2
+        ThreadsPerCore: 2
+      additional_networks:
+        $(concat(
+          [{
+            network=null,
+            subnetwork=a3ultra-slurm-net-1.subnetwork_self_link,
+            subnetwork_project=vars.project_id,
+            nic_type="GVNIC",
+            queue_count=null,
+            network_ip="",
+            stack_type=null,
+            access_config=[],
+            ipv6_access_config=[],
+            alias_ip_range=[]
+          }],
+          a3ultra-slurm-rdma-net.subnetwork_interfaces
+        ))
+
+  # - id: a3_ultra_nodeset_h
+  #   source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
+  #   use: [a3ultra-slurm-net-0, a3ultra_startup]
+  #   settings:
+  #     bandwidth_tier: gvnic_enabled
+  #     machine_type: a3-ultragpu-8g
+
+  #     enable_public_ips: true
+  #     node_count_static: 1
+  #     node_count_dynamic_max: 0
+  #     enable_placement: false
+  #     disk_type: hyperdisk-balanced
+  #     on_host_maintenance: TERMINATE
+
+  #     #Provisioning models
+  #     reservation_name: futres-20260305-003107-1vm-h
+  #     enable_spot_vm: $(vars.a3u_enable_spot_vm)
+  #     dws_flex:
+  #       enabled: $(vars.a3u_dws_flex_enabled)
+
+  #     advanced_machine_features:
+  #       threads_per_core: null # Use platform default value
+  #     node_conf:
+  #       CoresPerSocket: 56
+  #       SocketsPerBoard: 2
+  #       ThreadsPerCore: 2
+  #     additional_networks:
+  #       $(concat(
+  #         [{
+  #           network=null,
+  #           subnetwork=a3ultra-slurm-net-1.subnetwork_self_link,
+  #           subnetwork_project=vars.project_id,
+  #           nic_type="GVNIC",
+  #           queue_count=null,
+  #           network_ip="",
+  #           stack_type=null,
+  #           access_config=[],
+  #           ipv6_access_config=[],
+  #           alias_ip_range=[]
+  #         }],
+  #         a3ultra-slurm-rdma-net.subnetwork_interfaces
+  #       ))
+
   - id: a3_ultra_partition
     source: community/modules/compute/schedmd-slurm-gcp-v6-partition
     use:
-    - a3_ultra_nodeset
+    - a3_ultra_nodeset_a
+    - a3_ultra_nodeset_c
+    - a3_ultra_nodeset_d
+    - a3_ultra_nodeset_e
+    - a3_ultra_nodeset_f
+    - a3_ultra_nodeset_g
+    # - a3_ultra_nodeset_h
     settings:
       exclusive: false
       partition_name: a3ultra

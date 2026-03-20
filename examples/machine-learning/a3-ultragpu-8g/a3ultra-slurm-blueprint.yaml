@@ -16,11 +16,11 @@
 blueprint_name: a3ultra-slurm
 
 vars:
-  deployment_name: gcp64-03-2026
+  deployment_name: gcp64-03-2026-3
   project_id: projectseald
   region: us-south1
   zone: us-south1-b
-  a3u_cluster_size: 7
+  # a3u_cluster_size: 7
   # Image settings
   base_image:
     project: ubuntu-os-accelerator-images

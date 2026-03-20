@@ -16,11 +16,11 @@
 blueprint_name: a3ultra-slurm
 
 vars:
-  deployment_name: # supply deployment name
-  project_id: # supply project ID
-  region: # supply region
-  zone: # supply zone
-  a3u_cluster_size: # supply cluster size
+  deployment_name: gcp64-03-2026
+  project_id: projectseald
+  region: us-south1
+  zone: us-south1-b
+  a3u_cluster_size: 8
   # Image settings
   base_image:
     project: ubuntu-os-accelerator-images
@@ -331,9 +331,24 @@ deployment_groups:
     use:
     - a3ultra-slurm-net-0
     settings:
+      filestore_tier: ZONAL
+      size_gb: 1024
+      local_mount: /home
+      reserved_ip_range: $(vars.filestore_ip_range)
+      deletion_protection:
+        enabled: true
+        reason: Avoid data loss
+    outputs:
+    - network_storage
+
+  - id: aisingaporefs
+    source: modules/file-system/filestore
+    use:
+    - a3ultra-slurm-net-0
+    settings:
       filestore_tier: HIGH_SCALE_SSD
       size_gb: 10240
-      local_mount: /home
+      local_mount: /shared
       reserved_ip_range: $(vars.filestore_ip_range)
       deletion_protection:
         enabled: true
@@ -663,7 +678,8 @@ deployment_groups:
       partition_name: a3ultra
       is_default: true
       partition_conf:
-        OverSubscribe: EXCLUSIVE
+        OverSubscribe: YES
+        DefCpuPerGPU: 16
         ResumeTimeout: 1200
         SuspendTimeout: 1200
 
@@ -707,6 +723,7 @@ deployment_groups:
     - a3_ultra_partition
     - slurm_login
     - homefs
+    - aisingaporefs
     - gcs_bucket
     settings:
       enable_controller_public_ips: true

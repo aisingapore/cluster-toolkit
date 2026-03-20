@@ -15,15 +15,15 @@
 terraform_backend_defaults:
   type: gcs
   configuration:
-    bucket: # supply existing bucket to store Terraform state
+    bucket: gcp64-03-2026-terraform
 
 vars:
-  deployment_name: # supply unique deployment name
-  project_id: # supply existing project id
-  region: # supply region with a3-ultragpu-8g capacity in reservation
-  zone: # supply zone with a3-ultragpu-8g capacity in reservation
+  deployment_name: gcp64-03-2026
+  project_id: projectseald
+  region: us-south1
+  zone: us-south1-b
   a3u_reservation_name: # supply a3-ultragpu-8g reservation name
-  a3u_cluster_size: # supply a3-ultragpu-8g reservation size
+  a3u_cluster_size: 8
 
 # Additional provisioning models (pick only one), can be used to substitute `a3u_reservation_name`:
 #

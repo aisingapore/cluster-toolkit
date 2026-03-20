@@ -17,12 +17,12 @@
 blueprint_name: a3ultra-vm-instance
 
 vars:
-  project_id: # supply project ID
+  project_id: projectseald
   deployment_name: a3ultra-vm-instance
-  region: # supply region
-  zone: # supply zone
+  region: us-south1
+  zone: us-south1-b
   a3u_reservation_name: # supply reservation name
-  number_of_vms: 2
+  number_of_vms: 8
   a3u_provisioning_model: RESERVATION_BOUND
   instance_image:
     project: ubuntu-os-accelerator-images

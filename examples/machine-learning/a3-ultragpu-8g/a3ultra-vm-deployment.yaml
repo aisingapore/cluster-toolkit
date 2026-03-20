@@ -23,6 +23,6 @@ vars:
   project_id: projectseald
   region: us-south1
   zone: us-south1-b
-  a3u_reservation_name: # supply a3-ultragpu-8g reservation name
+  a3u_reservation_name: futres-20260305-003107-2vm-a,futres-20260305-003107-1vm-b,futres-20260305-003107-1vm-c,futres-20260305-003107-1vm-d,futres-20260305-003107-1vm-e, futres-20260305-003107-1vm-f,futres-20260305-003107-1vm-g,futres-20260305-003107-1vm-h
   a3u_provisioning_model: RESERVATION_BOUND # if you have a reservation, keep RESERVATION_BOUND. IF you do NOT have a reservation,set this to SPOT
   number_of_vms: 8

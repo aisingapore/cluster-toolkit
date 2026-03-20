@@ -21,7 +21,7 @@ vars:
   deployment_name: a3ultra-vm-instance
   region: us-south1
   zone: us-south1-b
-  a3u_reservation_name: # supply reservation name
+  a3u_reservation_name: futres-20260305-003107-2vm-a,futres-20260305-003107-1vm-b,futres-20260305-003107-1vm-c,futres-20260305-003107-1vm-d,futres-20260305-003107-1vm-e, futres-20260305-003107-1vm-f,futres-20260305-003107-1vm-g,futres-20260305-003107-1vm-h
   number_of_vms: 8
   a3u_provisioning_model: RESERVATION_BOUND
   instance_image:

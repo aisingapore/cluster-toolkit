@@ -23,13 +23,10 @@ vars:
   project_id: projectseald
   region: us-east5
   zone: us-east5-a
-  a3_static_cluster_size: 24
+  a3_static_cluster_size: 3
   a3_partition_name: a3
 
-  # tcpx_kernel_login: # use value supplied by Google Cloud staff
-  # tcpx_kernel_password: # use value supplied by Google Cloud staff
-  # keyserver_ubuntu_key: # use value supplied by Google Cloud staff
-  a3_reservation_name: a3high-slurm
+  a3_reservation_name: a3high-res
   slurm_cluster_name: gcp24-06-2026
   disk_size_gb: 200
   # Additional provisioning models (pick only one), can be used to substitute `a3_reservation_name`:

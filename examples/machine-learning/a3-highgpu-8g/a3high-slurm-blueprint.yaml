@@ -24,14 +24,14 @@ vars:
   # slurm_cluster_name: 
 
   sys_net_range: 172.16.0.0/16
-  filestore_ip_range: 192.168.0.0/26
-  aisingapore_filestore_ip_range: 192.168.0.64/26
+  filestore_ip_range: 192.168.0.0/24 # Old /26
+  aisingapore_filestore_ip_range: 192.168.1.0/24 # Old 192.168.0.64/26
   source_image_project_id: ubuntu-os-cloud
   source_image_family: ubuntu-2204-lts
   local_mount_homefs: /home
   instance_image:
     project: $(vars.project_id)
-    family: $(vars.deployment_name)-tcpx-image
+    family: $(vars.deployment_name)-slurm-image
   localssd_mountpoint: /mnt/localssd
   enable_nvidia_dcgm: true
   disk_size_gb: 200
@@ -84,7 +84,7 @@ deployment_groups:
     settings:
       filestore_tier: ZONAL
       size_gb: 1024
-      local_mount: /home
+      local_mount: $(vars.local_mount_homefs)
       reserved_ip_range: $(vars.filestore_ip_range) # Old 192.168.34.0/24
       deletion_protection:
         enabled: true
@@ -123,67 +123,6 @@ deployment_groups:
       - 10.3.0.*
       - $(vars.slurm_cluster_name)*
       runners:
-      - type: ansible-local
-        destination: install_tcpx_kernel.yml
-        content: |
-          ---
-          - name: Install TCPx-patched kernel
-            hosts: all
-            become: true
-            tasks:
-            - name: setup apt authentication
-              ansible.builtin.copy:
-                dest: /etc/apt/auth.conf
-                owner: root
-                group: root
-                mode: 0o600
-                content: |
-                  machine https://private-ppa.launchpadcontent.net/canonical-kernel-gcp-tcpx/release/ubuntu
-                  login $(vars.tcpx_kernel_login)
-                  password $(vars.tcpx_kernel_password)
-            - name: Add Ubuntu tcpx apt GPG key
-              ansible.builtin.apt_key:
-                keyserver: keyserver.ubuntu.com
-                id: $(vars.keyserver_ubuntu_key)
-            - name: Setup tcpx kernel apt repository
-              ansible.builtin.apt_repository:
-                repo: deb https://private-ppa.launchpadcontent.net/canonical-kernel-gcp-tcpx/release/ubuntu {{ ansible_distribution_release }} main
-                state: present
-            - name: Setup tcpx kernel apt source repository
-              ansible.builtin.apt_repository:
-                repo: deb-src https://private-ppa.launchpadcontent.net/canonical-kernel-gcp-tcpx/release/ubuntu {{ ansible_distribution_release }} main
-                state: present
-            - name: Install dkms package
-              ansible.builtin.package:
-                name: dkms
-                state: present
-            - name: Install tcpx kernel
-              ansible.builtin.package:
-                name: linux-gcp-tcpx
-                state: present
-              notify: Update GRUB
-            - name: Find the tcpx kernel menu entry string
-              ansible.builtin.shell:
-                cmd: "grep '^menuentry.*gcp-tcpx' /boot/grub/grub.cfg | head -n 1 | cut -d\\' -f2"
-              register: tcpx_menu_entry
-              changed_when: false
-            - name: Set GRUB default to the tcpx kernel by name
-              ansible.builtin.lineinfile:
-                path: /etc/default/grub
-                regexp: '^GRUB_DEFAULT='
-                line: 'GRUB_DEFAULT="{{ tcpx_menu_entry.stdout }}"'
-              notify: Update GRUB
-            - name: Freeze tpcx kernel
-              ansible.builtin.dpkg_selections:
-                name: "{{ item }}"
-                selection: hold
-              loop:
-              - linux-image-gcp-tcpx
-              - linux-headers-gcp-tcpx
-            handlers:
-              - name: Update GRUB
-                ansible.builtin.command: update-grub
-
       - type: ansible-local
         destination: install_gcc_12.yml
         content: |
@@ -279,12 +218,6 @@ deployment_groups:
                 name: nvidia-dcgm.service
                 state: stopped
                 enabled: false
-            - name: Force DKMS to run on kernel that isn't running
-              ansible.builtin.shell: |
-                # Install dkms module for tcpx kernel
-                ls /usr/src/linux-headers-*tcpx* -d | sed -e 's/.*linux-headers-//' | \
-                sort -V | tac | xargs -n1 /usr/lib/dkms/dkms_autoinstaller start
-              changed_when: false
 
       - type: data
         destination: /etc/systemd/system/delay-a3.service
@@ -336,7 +269,7 @@ deployment_groups:
             "install_ompi": true,
             "monitoring_agent": "cloud-ops",
             "nvidia_version": "latest",
-            "allow_kernel_upgrades": true, # tcpx kernel is held and gcp kernel is removed as the last task
+            "allow_kernel_upgrades": true,
             "install_nvidia_repo": false,
             "monitoring_agent": "cloud-ops",
           }
@@ -449,31 +382,6 @@ deployment_groups:
           rss_set_size: 8
           tcpd_queue_size: 8
           max_rx_rules: 100000
-      - type: ansible-local
-        destination: cleanup_kernels.yml
-        content: |
-          ---
-          - name: Cleanup linux-gcp kernel
-            hosts: all
-            become: true
-            tasks:
-            - name: Find all standard GCP kernel packages
-              ansible.builtin.shell:
-                cmd: |
-                  dpkg -l | grep -E 'linux-(image|headers)-[0-9].*-gcp' | grep -v tcpx | awk '{print $2}'
-              register: gcp_kernel_packages
-              changed_when: false
-              check_mode: no # Always run this check, even in check mode
-            - name: Remove all standard GCP kernel packages
-              ansible.builtin.package:
-                name: "{{ ['linux-gcp', 'linux-image-gcp', 'linux-headers-gcp'] + gcp_kernel_packages.stdout_lines }}"
-                state: absent
-                autoremove: yes
-              when: gcp_kernel_packages.stdout_lines | length > 0
-              notify: Update GRUB
-            handlers:
-              - name: Update GRUB
-                ansible.builtin.command: update-grub
 
 - group: image
   modules:
@@ -486,7 +394,7 @@ deployment_groups:
     settings:
       # building this image does not require a GPU-enabled VM but must *not* be
       # run on a N-series VM otherwise, the "open" drivers will not install
-      machine_type: c2d-standard-32
+      machine_type: c2-standard-8
       source_image_project_id: [$(vars.source_image_project_id)]
       source_image_family: $(vars.source_image_family)
       image_family: $(vars.instance_image.family)
@@ -656,11 +564,6 @@ deployment_groups:
           chmod 0755 "${SLURM_ROOT}/scripts/sudo-oslogin"
           ln -s "${SLURM_ROOT}/scripts/sudo-oslogin" "${SLURM_ROOT}/prolog_slurmd.d/sudo-oslogin.prolog_slurmd"
           ln -s "${SLURM_ROOT}/scripts/sudo-oslogin" "${SLURM_ROOT}/epilog_slurmd.d/sudo-oslogin.epilog_slurmd"
-          curl -s -o "${SLURM_ROOT}/scripts/receive-data-path-manager" \
-              https://raw.githubusercontent.com/GoogleCloudPlatform/slurm-gcp/master/tools/prologs-epilogs/receive-data-path-manager
-          chmod 0755 "${SLURM_ROOT}/scripts/receive-data-path-manager"
-          ln -s "${SLURM_ROOT}/scripts/receive-data-path-manager" "${SLURM_ROOT}/partition-$(vars.a3_partition_name)-prolog_slurmd.d/start-rxdm.prolog_slurmd"
-          ln -s "${SLURM_ROOT}/scripts/receive-data-path-manager" "${SLURM_ROOT}/partition-$(vars.a3_partition_name)-epilog_slurmd.d/stop-rxdm.epilog_slurmd"
           # enable a GPU health check that runs at the completion of all jobs on A3high nodes
           ln -s "/slurm/scripts/tools/gpu-test" "${SLURM_ROOT}/partition-$(vars.a3_partition_name)-epilog_slurmd.d/gpu-test.epilog_slurmd"
       - type: shell

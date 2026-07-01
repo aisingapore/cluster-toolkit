@@ -1,0 +1,37 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+terraform_backend_defaults:
+  type: gcs
+  configuration:
+    bucket: gcp24-06-2026-terraform
+
+vars:
+  deployment_name: a2ultra-slurm
+  project_id: projectseald
+  region: us-east5
+  zone: us-east5-a
+
+  a2_static_cluster_size: 15
+  a2_dynamic_cluster_size: 0
+  a2_partition_name: a2
+  a2_reservation_name: "a2ultra-res"
+  a2_enable_spot_vm: false
+
+  disk_size_gb: 200
+  sharedfs_size_gb: 10240
+  sharedfs_mount: /shared
+  sharedfs_tier: HIGH_SCALE_SSD

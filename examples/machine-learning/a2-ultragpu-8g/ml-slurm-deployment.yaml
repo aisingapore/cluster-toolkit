@@ -25,7 +25,7 @@ vars:
   region: us-east5
   zone: us-east5-a
 
-  a2_static_cluster_size: 15
+  a2_static_cluster_size: 16
   a2_dynamic_cluster_size: 0
   a2_partition_name: a2
   a2_reservation_name: "a2ultra-res"

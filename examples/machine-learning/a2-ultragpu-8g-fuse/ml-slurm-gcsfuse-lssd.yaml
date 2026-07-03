@@ -234,14 +234,34 @@ deployment_groups:
     settings:
       node_count_static: $(vars.a2_static_cluster_size)
       node_count_dynamic_max: $(vars.a2_dynamic_cluster_size)
-      reservation_name: null
+      # a2ultra-res is a SPECIFIC reservation (specificReservationRequired=true),
+      # so VMs must target it by name to consume it; leaving this null makes Slurm
+      # request new quota on top of the reservation and hit a GPU quota error.
+      reservation_name: a2ultra-res
       enable_spot_vm: $(vars.a2_enable_spot_vm)
       bandwidth_tier: gvnic_enabled
       machine_type: a2-ultragpu-8g
       instance_image: $(vars.new_image)
       disk_type: pd-ssd
       disk_size_gb: $(vars.disk_size_gb)
+      # a2-ultragpu-8g ships with a fixed set of 8 local SSDs (375 GB each);
+      # all 8 must be declared. They are RAIDed into $(vars.localssd_mountpoint)
+      # by the local_ssd_filesystem runner in a2_startup.
       additional_disks:
+      - disk_type: local-ssd
+        disk_size_gb: 375
+      - disk_type: local-ssd
+        disk_size_gb: 375
+      - disk_type: local-ssd
+        disk_size_gb: 375
+      - disk_type: local-ssd
+        disk_size_gb: 375
+      - disk_type: local-ssd
+        disk_size_gb: 375
+      - disk_type: local-ssd
+        disk_size_gb: 375
+      - disk_type: local-ssd
+        disk_size_gb: 375
       - disk_type: local-ssd
         disk_size_gb: 375
       node_conf:

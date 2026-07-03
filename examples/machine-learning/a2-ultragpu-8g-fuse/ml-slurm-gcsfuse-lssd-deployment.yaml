@@ -1,0 +1,18 @@
+---
+terraform_backend_defaults:
+  type: gcs
+  configuration:
+    bucket: gcp0626-a2u  # specify the bucket
+
+vars:
+  deployment_name: a2ultra-slurm-gcsfuse
+  project_id: projectseald  # specify the project id
+  region: us-east5  # specify the region & zone
+  zone: us-east5-a
+  a2_static_cluster_size: 16  # specify the cluster size
+  a2_dynamic_cluster_size: 0
+  a2_partition_name: a2
+  a2_enable_spot_vm: false
+  disk_size_gb: 200
+  # Note: reservation_name is omitted because the reservation is Automatic.
+  # GCP will automatically match and consume it based on the VM properties.

@@ -1,0 +1,278 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+blueprint_name: a2ultra-slurm-gcsfuse-lssd
+
+vars:
+  new_image:
+    family: $(vars.deployment_name)-slurm-image
+    project: $(vars.project_id)
+  localssd_mountpoint: /mnt/localssd
+
+deployment_groups:
+- group: image-env
+  modules:
+  - id: builder-net
+    source: modules/network/vpc
+    settings:
+      network_name: $(vars.deployment_name)-builder-net
+      subnetwork_name: $(vars.deployment_name)-builder-subnet
+
+- group: image-build-script
+  modules:
+  - id: script
+    source: modules/scripts/startup-script
+    settings:
+      runners:
+      - type: shell
+        destination: install-gcsfuse.sh
+        content: |
+          #!/bin/bash
+          set -e
+          apt-get update
+          apt-get install -y curl lsb-release
+          RELEASE=\$(lsb_release -c -s)
+          export GCSFUSE_REPO="gcsfuse-${RELEASE}"
+          echo "deb https://packages.cloud.google.com/apt $GCSFUSE_REPO main" | tee /etc/apt/sources.list.d/gcsfuse.list
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+          apt-get update
+          apt-get install -y gcsfuse
+      - type: shell
+        destination: install-ml-libraries.sh
+        content: |
+          #!/bin/bash
+          # this script is designed to execute on Slurm images published by SchedMD that:
+          # - are based on Debian distribution of Linux
+          # - have NVIDIA drivers pre-installed
+          set -e -o pipefail
+          echo "deb https://packages.cloud.google.com/apt google-fast-socket main" > /etc/apt/sources.list.d/google-fast-socket.list
+          apt-get update --allow-releaseinfo-change
+          apt-get install --assume-yes google-fast-socket
+          CONDA_BASE=/opt/conda
+          if [ -d $CONDA_BASE ]; then exit 0; fi
+          DL_DIR=\$(mktemp -d)
+          cd $DL_DIR
+          curl -L -O https://github.com/conda-forge/miniforge/releases/download/24.7.1-2/Miniforge3-24.7.1-2-Linux-x86_64.sh
+          HOME=$DL_DIR bash Miniforge3-24.7.1-2-Linux-x86_64.sh -b -p $CONDA_BASE
+          cd - && rm -rf $DL_DIR
+          source $CONDA_BASE/bin/activate base
+          conda init --system
+          conda config --system --set auto_activate_base False
+          # following channel ordering is important! use strict_priority!
+          conda config --system --set channel_priority strict
+          conda update -n base conda --yes
+          ### create a virtual environment for tensorflow
+          conda create -n tf python=3.11 --yes
+          conda activate tf
+          pip install tensorflow[and-cuda]==2.18.*
+          pip install tensorrt==10.6.*
+          ### create a virtual environment for pytorch
+          conda create -n pytorch python=3.11 --yes
+          conda activate pytorch
+          pip install torch torchvision torchaudio
+
+- group: image
+  modules:
+  - id: custom-image
+    source: modules/packer/custom-image
+    kind: packer
+    use:
+    - builder-net
+    - script
+    settings:
+      omit_external_ip: false
+      source_image_project_id: [schedmd-slurm-public]
+      source_image_family: slurm-gcp-6-11-debian-12
+      disk_size: $(vars.disk_size_gb)
+      disk_type: pd-ssd
+      image_family: $(vars.new_image.family)
+      machine_type: c2-standard-4
+      state_timeout: 15m
+
+- group: cluster-env
+  modules:
+  - id: network
+    source: modules/network/vpc
+    settings:
+      network_name: $(vars.deployment_name)-net
+      subnetwork_name: $(vars.deployment_name)-subnet
+
+  - id: private_service_access
+    source: modules/network/private-service-access
+    use: [network]
+
+  # The following four modules create and mount a Cloud Storage Bucket with
+  # gcsfuse. They are optional but recommended for many use cases.
+  # (Optional) The following creates a GCS bucket that will be mounted
+  # using gcsfuse. If you prefer to use a pre-existing bucket, use the
+  # modules/file-system/pre-existing-network-storage module.
+  - id: gcs_bucket
+    source: modules/file-system/cloud-storage-bucket
+    settings:
+      enable_hierarchical_namespace: true
+      local_mount: /gcs
+      random_suffix: true
+      # Standard mount options for the main mount
+      mount_options: "implicit_dirs,\
+        metadata_cache_negative_ttl_secs=0,\
+        metadata_cache_ttl_secs=-1,\
+        stat_cache_max_size_mb=-1,\
+        type_cache_max_size_mb=-1,\
+        dir_mode=777,\
+        file_mode=777,\
+        allow_other"
+
+  # (Optional) Create a mount-point optimized for checkpoint writing/reading.
+  # Uses local-ssd for caching and enables parallel downloads.
+  - id: gcs_checkpoints
+    source: modules/file-system/pre-existing-network-storage
+    settings:
+      remote_mount: $(gcs_bucket.gcs_bucket_name)
+      local_mount: /gcs-checkpoints
+      fs_type: gcsfuse
+      mount_options: "profile=aiml-checkpointing,\
+        cache_dir=$(vars.localssd_mountpoint),\
+        dir_mode=777,\
+        file_mode=777,\
+        allow_other"
+
+  # (Optional) Create a mount-point optimized for reading training data.
+  # Enables file cache on the local SSD.
+  - id: gcs_training_data
+    source: modules/file-system/pre-existing-network-storage
+    settings:
+      remote_mount: $(gcs_bucket.gcs_bucket_name)
+      local_mount: /gcs-training-data
+      fs_type: gcsfuse
+      mount_options: "profile=aiml-training,\
+        cache_dir=$(vars.localssd_mountpoint),\
+        dir_mode=777,\
+        file_mode=777,\
+        allow_other"
+
+  # (Optional) Create a mount-point optimized for model serving.
+  - id: gcs_model_serving
+    source: modules/file-system/pre-existing-network-storage
+    settings:
+      remote_mount: $(gcs_bucket.gcs_bucket_name)
+      local_mount: /gcs-model-serving
+      fs_type: gcsfuse
+      mount_options: "profile=aiml-serving,\
+        cache_dir=$(vars.localssd_mountpoint),\
+        dir_mode=777,\
+        file_mode=777,\
+        allow_other"
+
+- group: cluster
+  modules:
+  - id: a2_startup
+    source: modules/scripts/startup-script
+    settings:
+      local_ssd_filesystem:
+        mountpoint: $(vars.localssd_mountpoint)
+        permissions: "1777"
+      runners:
+      # Use the built-in runners from the GCSFuse mount modules
+      - $(gcs_checkpoints.client_install_runner)
+      - $(gcs_checkpoints.mount_runner)
+      - $(gcs_training_data.client_install_runner)
+      - $(gcs_training_data.mount_runner)
+      - $(gcs_model_serving.client_install_runner)
+      - $(gcs_model_serving.mount_runner)
+      - type: data
+        destination: /var/tmp/torch_test.sh
+        content: |
+          #!/bin/bash
+          source /etc/profile.d/conda.sh
+          conda activate pytorch
+          python3 torch_test.py
+      - type: data
+        destination: /var/tmp/torch_test.py
+        content: |
+          import torch
+          import torch.utils.benchmark as benchmark
+          def batched_dot_mul_sum(a, b):
+              '''Computes batched dot by multiplying and summing'''
+              return a.mul(b).sum(-1)
+          def batched_dot_bmm(a, b):
+              '''Computes batched dot by reducing to bmm'''
+              a = a.reshape(-1, 1, a.shape[-1])
+              b = b.reshape(-1, b.shape[-1], 1)
+              return torch.bmm(a, b).flatten(-3)
+          # use GPU if available, else CPU
+          device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+          print('Using device:', device)
+          if device.type == 'cuda':
+              print(torch.cuda.get_device_name(0))
+          # benchmarking
+          x = torch.randn(10000, 64)
+          t0 = benchmark.Timer(
+              stmt='batched_dot_mul_sum(x, x)',
+              setup='from __main__ import batched_dot_mul_sum',
+              globals={'x': x})
+          t1 = benchmark.Timer(
+              stmt='batched_dot_bmm(x, x)',
+              setup='from __main__ import batched_dot_bmm',
+              globals={'x': x})
+          print(t0.timeit(100))
+          print(t1.timeit(100))
+
+  - id: a2_nodeset
+    source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
+    use: [network, a2_startup]
+    settings:
+      node_count_static: $(vars.a2_static_cluster_size)
+      node_count_dynamic_max: $(vars.a2_dynamic_cluster_size)
+      reservation_name: null
+      enable_spot_vm: $(vars.a2_enable_spot_vm)
+      bandwidth_tier: gvnic_enabled
+      machine_type: a2-ultragpu-8g
+      instance_image: $(vars.new_image)
+      disk_type: pd-ssd
+      disk_size_gb: $(vars.disk_size_gb)
+      additional_disks:
+      - disk_type: local-ssd
+        disk_size_gb: 375
+      node_conf:
+        SocketsPerBoard: 2
+        CoresPerSocket: 24
+
+  - id: a2_partition
+    source: community/modules/compute/schedmd-slurm-gcp-v6-partition
+    use: [a2_nodeset]
+    settings:
+      partition_name: $(vars.a2_partition_name)
+      is_default: true
+      exclusive: false
+      partition_conf:
+        DefMemPerGPU: 160000
+        DefMemPerCPU: null
+
+  - id: slurm_login
+    source: community/modules/scheduler/schedmd-slurm-gcp-v6-login
+    use: [network]
+    settings:
+      enable_login_public_ips: true
+      instance_image: $(vars.new_image)
+
+  - id: slurm_controller
+    source: community/modules/scheduler/schedmd-slurm-gcp-v6-controller
+    use:
+    - network
+    - a2_partition
+    - slurm_login
+    - gcs_bucket
+    settings:
+      enable_controller_public_ips: true
+      instance_image: $(vars.new_image)

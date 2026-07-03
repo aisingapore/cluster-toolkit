@@ -1,0 +1,1 @@
+./gcluster deploy examples/machine-learning/a2-ultragpu-8g-fuse/ml-slurm-gcsfuse-lssd.yaml -d examples/machine-learning/a2-ultragpu-8g-fuse/ml-slurm-gcsfuse-lssd-deployment.yaml --auto-approve -w

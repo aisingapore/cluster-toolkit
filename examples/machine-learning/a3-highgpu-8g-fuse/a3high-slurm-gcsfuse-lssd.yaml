@@ -193,7 +193,12 @@ deployment_groups:
               - cuda-toolkit-12-8
               - nvidia-dkms-570-server-open
               - nvidia-driver-570-server-open
-              - datacenter-gpu-manager
+              # DCGM 4 + ALL CUDA plugin sets (cuda11/12/13). DCGM's `dcgmi diag`
+              # (run by the gpu-test epilog) selects its plugin dir by the running
+              # driver's CUDA level; the driver floats to "latest" (currently 580 =>
+              # CUDA 13), so cuda12-only plugins fail with "Cannot load plugins ...
+              # plugins/cuda13/: No such file" (rc 226) and drain the node.
+              - datacenter-gpu-manager-4-cuda-all
               - libnvidia-nscq-570
               - nvidia-container-toolkit
             tasks:
@@ -298,11 +303,10 @@ deployment_groups:
             "install_gcsfuse": true,
             "install_lustre": false,
             "install_ompi": true,
-            "monitoring_agent": "cloud-ops",
             "nvidia_version": "latest",
-            "allow_kernel_upgrades": true, # tcpx kernel is held and gcp kernel is removed as the last task
+            "allow_kernel_upgrades": true,
             "install_nvidia_repo": false,
-            "monitoring_agent": "cloud-ops",
+            "monitoring_agent": "cloud-ops"
           }
 
       - type: shell
@@ -449,8 +453,12 @@ deployment_groups:
     - sysnet
     settings:
       # building this image does not require a GPU-enabled VM but must *not* be
-      # run on a N-series VM otherwise, the "open" drivers will not install
-      machine_type: c2d-standard-32
+      # run on a N-series VM otherwise, the "open" drivers will not install.
+      # c2d-standard-32 is not offered in us-east5-a and t2d-standard-32 hit a
+      # zone capacity stockout; c2-standard-16 is a non-N-series (compute-
+      # optimized) type available with capacity here and supports pd-balanced
+      # boot disks (the module default; c4/c4d would require hyperdisk).
+      machine_type: c2-standard-16
       source_image_project_id: [$(vars.source_image_project_id)]
       source_image_family: $(vars.source_image_family)
       image_family: $(vars.instance_image.family)

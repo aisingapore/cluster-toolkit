@@ -28,9 +28,9 @@ vars:
   zone: us-east5-a  # supply zone with a3-highgpu-8g capacity in reservation
   # Credentials for the private TCPX kernel PPA. These are shared values
   # supplied by Google Cloud staff (not user/project specific).
-  tcpx_kernel_login: linux-gcp-tcpx-google
-  tcpx_kernel_password: DLwDV5bCpCPqCRlvg8td
-  keyserver_ubuntu_key: 3DD6E9491BB719B4
+  tcpx_kernel_login: # supplied by deploy.local.sh from .env
+  tcpx_kernel_password: # supplied by deploy.local.sh from .env
+  keyserver_ubuntu_key: # supplied by deploy.local.sh from .env
   a3_reservation_name:  a3high-res # supply a3-highgpu-8g reservation name
   slurm_cluster_name: a3high  # lowercase letters, numbers, hyphens; max 20 chars; must start with a letter
   a3_static_cluster_size: 3 # supply a3-highgpu-8g reservation size
